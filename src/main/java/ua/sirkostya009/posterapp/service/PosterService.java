@@ -1,15 +1,15 @@
 package ua.sirkostya009.posterapp.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.sirkostya009.posterapp.exception.NotFoundException;
 import ua.sirkostya009.posterapp.dao.AppUser;
 import ua.sirkostya009.posterapp.dao.Hashtag;
 import ua.sirkostya009.posterapp.dao.Poster;
+import ua.sirkostya009.posterapp.exception.NotFoundException;
 import ua.sirkostya009.posterapp.repo.HashtagRepo;
 import ua.sirkostya009.posterapp.repo.PosterRepo;
 
@@ -102,7 +102,7 @@ public class PosterService {
                 .sorted(Comparator.reverseOrder())
                 .toList();
 
-        return new PageImpl<>(recommended, pageRequest(page), recommended.size());
+        return new SliceImpl<>(recommended, pageRequest(page), true);
     }
 
     @Transactional
@@ -150,7 +150,7 @@ public class PosterService {
                 posters.addAll(posterRepo.findMostPopularWithTag(hashtag.getTag(), pageRequest(page)).getContent())
         );
 
-        return new PageImpl<>(posters.stream().toList(), pageRequest(page), posters.size());
+        return new SliceImpl<>(posters.stream().toList(), pageRequest(page), true);
     }
 
     private PageRequest pageRequest(Integer page) {

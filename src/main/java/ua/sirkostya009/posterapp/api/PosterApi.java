@@ -5,9 +5,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-import ua.sirkostya009.posterapp.dto.PosterInfo;
 import ua.sirkostya009.posterapp.dao.AppUser;
 import ua.sirkostya009.posterapp.dao.Poster;
+import ua.sirkostya009.posterapp.dto.PosterInfo;
 import ua.sirkostya009.posterapp.exception.NotFoundException;
 import ua.sirkostya009.posterapp.service.PosterService;
 import ua.sirkostya009.posterapp.service.UserService;
@@ -44,9 +44,10 @@ public class PosterApi {
     @GetMapping
     public Slice<PosterInfo> all(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                  JwtAuthenticationToken token) {
+        var user = userService.findByUsername(token.getName());
         return sliceOfPostersToPosterInfos(
-                posterService.recommendation(page, userService.findByUsername(token.getName())),
-                userService.findByUsername(token.getName()),
+                posterService.recommendation(page, user),
+                user,
                 true
         );
     }
@@ -105,10 +106,10 @@ public class PosterApi {
     public PosterInfo edit(@RequestBody String newText,
                            @PathVariable Long id,
                            JwtAuthenticationToken token) {
-        var requester = userService.findByUsername(token.getName());
+        var user = userService.findByUsername(token.getName());
         return PosterInfo.of(
-                posterService.editPoster(newText, id, requester),
-                requester,
+                posterService.editPoster(newText, id, user),
+                user,
                 false
         );
     }
