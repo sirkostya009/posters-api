@@ -1,18 +1,23 @@
 package ua.sirkostya009.posterapp.service;
 
 import lombok.RequiredArgsConstructor;
-import ua.sirkostya009.posterapp.exception.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 import ua.sirkostya009.posterapp.dto.Credentials;
-import ua.sirkostya009.posterapp.jwt.JwtGenerator;
+import ua.sirkostya009.posterapp.exception.AuthenticationException;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
     private final UserService userService;
-    private final JwtGenerator generator;
+    private final JwtEncoder jwtEncoder;
     private final PasswordEncoder encoder;
 
     /**
@@ -33,7 +38,16 @@ public class AuthenticationService {
         if (!encoder.matches(credentials.getPassword(), user.getPassword()))
             throw new AuthenticationException("password incorrect");
 
-        return generator.generate(user.getUsername());
+        var issuedAt = Instant.now();
+        var expiresAt = issuedAt.plus(14, ChronoUnit.DAYS);
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(
+                JwtClaimsSet.builder()
+                        .issuedAt(issuedAt)
+                        .expiresAt(expiresAt)
+                        .subject(user.getUsername())
+                        .build()
+        )).getTokenValue();
     }
 
 }
