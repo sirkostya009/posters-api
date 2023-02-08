@@ -50,7 +50,7 @@ public class PosterService {
                 .map(this::parseTag)
                 .filter(Objects::nonNull)
                 .map(tag -> hashtagRepo.findByTagIgnoreCase(tag)
-                        .orElseGet(() -> hashtagRepo.save(new Hashtag(tag))))
+                                .orElseGet(() -> hashtagRepo.save(new Hashtag(tag))))
                 .collect(Collectors.toSet());
 
         result.forEach(Hashtag::incrementMentions); // for some reason I cant do this directly inside map method
@@ -97,7 +97,7 @@ public class PosterService {
         var recommended = postersByUser.stream()
                 .map(Poster::getHashtags)
                 .flatMap(Collection::stream)
-                .flatMap(hashtag -> posterRepo.findMostPopularWithTag(hashtag.getTag(), pageRequest(page)).stream())
+                .flatMap(hashtag -> posterRepo.findMostPopularWithTag(hashtag, pageRequest(page)).stream())
                 .distinct()
                 .sorted(Comparator.reverseOrder())
                 .toList();
@@ -147,7 +147,7 @@ public class PosterService {
         var posters = new HashSet<Poster>(tags.getNumberOfElements());
 
         tags.getContent().forEach(hashtag ->
-                posters.addAll(posterRepo.findMostPopularWithTag(hashtag.getTag(), pageRequest(page)).getContent())
+                posters.addAll(posterRepo.findMostPopularWithTag(hashtag, pageRequest(page)).getContent())
         );
 
         return new SliceImpl<>(posters.stream().toList(), pageRequest(page), true);
