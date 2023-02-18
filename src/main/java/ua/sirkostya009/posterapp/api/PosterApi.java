@@ -2,17 +2,12 @@ package ua.sirkostya009.posterapp.api;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-import ua.sirkostya009.posterapp.dao.AppUser;
-import ua.sirkostya009.posterapp.dao.Poster;
 import ua.sirkostya009.posterapp.dto.PosterInfo;
 import ua.sirkostya009.posterapp.exception.NotFoundException;
 import ua.sirkostya009.posterapp.service.PosterService;
 import ua.sirkostya009.posterapp.service.UserService;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,12 +39,8 @@ public class PosterApi {
     @GetMapping
     public Slice<PosterInfo> all(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                  JwtAuthenticationToken token) {
-        var user = userService.findByUsername(token.getName());
-        return sliceOfPostersToPosterInfos(
-                posterService.recommendation(page, user),
-                user,
-                true
-        );
+        return posterService.popular(page)
+                .map(poster -> PosterInfo.of(poster, userService.findByUsername(token.getName()), true));
     }
 
     /**
@@ -61,11 +52,8 @@ public class PosterApi {
     @GetMapping("/popular")
     public Slice<PosterInfo> popular(@RequestParam(name = "page",  defaultValue = "0") Integer page,
                                      JwtAuthenticationToken token) {
-        return sliceOfPostersToPosterInfos(
-                posterService.popular(page),
-                userService.findByUsername(token.getName()),
-                true
-        );
+        return posterService.popular(page)
+                .map(poster -> PosterInfo.of(poster, userService.findByUsername(token.getName()), true));
     }
 
     /**
@@ -126,23 +114,8 @@ public class PosterApi {
     public Slice<PosterInfo> userPosters(@PathVariable String username,
                                          @RequestParam(name = "value", defaultValue = "0") Integer page,
                                          JwtAuthenticationToken token) {
-        return sliceOfPostersToPosterInfos(
-                posterService.postersByUser(userService.findByUsername(username), page),
-                userService.findByUsername(token.getName()),
-                false
-        );
-    }
-
-    private Slice<PosterInfo> sliceOfPostersToPosterInfos(Slice<Poster> slice, AppUser requester, boolean includeUserInfo) {
-        return new SliceImpl<>(
-                listOfPostersToPosterInfos(slice.getContent(), requester, includeUserInfo),
-                slice.getPageable(),
-                slice.hasNext()
-        );
-    }
-
-    private List<PosterInfo> listOfPostersToPosterInfos(List<Poster> posters, AppUser requester, boolean includeUserInfo) {
-        return posters.stream().map(poster -> PosterInfo.of(poster, requester, includeUserInfo)).toList();
+        return posterService.postersByUser(userService.findByUsername(username), page)
+                .map(poster -> PosterInfo.of(poster, userService.findByUsername(token.getName()), true));
     }
 
 }
