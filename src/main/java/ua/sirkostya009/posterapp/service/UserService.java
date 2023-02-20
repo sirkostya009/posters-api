@@ -7,12 +7,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ua.sirkostya009.posterapp.dao.AppUser;
+import ua.sirkostya009.posterapp.dao.ConfirmationToken;
+import ua.sirkostya009.posterapp.dto.ChangeSettingsRequest;
 import ua.sirkostya009.posterapp.email.ConfirmationEmailSender;
 import ua.sirkostya009.posterapp.email.EmailSender;
 import ua.sirkostya009.posterapp.exception.NotFoundException;
-import ua.sirkostya009.posterapp.dto.ChangeSettingsRequest;
-import ua.sirkostya009.posterapp.dao.AppUser;
-import ua.sirkostya009.posterapp.dao.ConfirmationToken;
 import ua.sirkostya009.posterapp.repo.ConfirmationTokenRepo;
 import ua.sirkostya009.posterapp.repo.UserRepo;
 
@@ -40,7 +40,7 @@ public class UserService implements UserDetailsService {
 
     public AppUser findByUsername(String username) {
         return userRepo.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("user with username " + username + " could not be found"));
+                .orElseThrow(NotFoundException.supplier("user with username " + username + " could not be found"));
     }
 
     /**
@@ -48,7 +48,7 @@ public class UserService implements UserDetailsService {
      */
     public AppUser findById(Long id) {
         return userRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("user with id " + id + " could not be found"));
+                .orElseThrow(NotFoundException.supplier("user with id " + id + " could not be found"));
     }
 
     @Transactional
@@ -64,7 +64,7 @@ public class UserService implements UserDetailsService {
 
     public AppUser findByLogin(String login) {
         return userRepo.findByUsernameOrEmail(login, login)
-                .orElseThrow(() -> new NotFoundException("user with login " + login + " could not be found"));
+                .orElseThrow(NotFoundException.supplier("user with login " + login + " could not be found"));
     }
 
     /**
@@ -72,7 +72,7 @@ public class UserService implements UserDetailsService {
      */
     public AppUser findByEmail(String email) {
         return userRepo.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("email " + email + " not found"));
+                .orElseThrow(NotFoundException.supplier("email " + email + " not found"));
     }
 
     @Transactional

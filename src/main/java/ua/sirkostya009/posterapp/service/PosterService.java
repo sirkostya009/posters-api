@@ -30,7 +30,7 @@ public class PosterService {
 
     public Poster getPoster(Long id) {
         return posterRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("poster with id " + id + " could not be found"));
+                .orElseThrow(NotFoundException.supplier("poster with id " + id + " could not be found"));
     }
 
     @Transactional

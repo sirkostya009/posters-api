@@ -41,7 +41,7 @@ public class RegistrationService {
     @Transactional
     public void confirm(String token) {
         var confirmationToken = tokenRepo.findByToken(token)
-                .orElseThrow(() -> new NotFoundException("token " + token + " not found"));
+                .orElseThrow(NotFoundException.supplier("token " + token + " not found"));
 
         if (confirmationToken.getConfirmedAt() != null)
             throw new InvalidTokenException("token " + token + " outdated");
