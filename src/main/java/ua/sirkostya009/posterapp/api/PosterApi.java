@@ -39,8 +39,9 @@ public class PosterApi {
     @GetMapping
     public Slice<PosterInfo> all(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                  JwtAuthenticationToken token) {
-        return posterService.popular(page)
-                .map(poster -> PosterInfo.of(poster, userService.findByUsername(token.getName()), true));
+        var user = userService.findByUsername(token.getName());
+        return posterService.recommendation(page, user)
+                .map(poster -> PosterInfo.of(poster, user, true));
     }
 
     /**
